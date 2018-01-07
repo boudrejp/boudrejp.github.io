@@ -20,17 +20,17 @@
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="/Rugby_Web_Scraper.html">Building a web scraper for international rugby scoring</a></h1>
+                    <h1 class="entry-title"><a href="/Rugby_Stats_Analysis.html">An analysis of international rugby scoring</a></h1>
 <footer class="post-info">
-        <abbr class="published" title="2018-01-04T00:00:00+01:00">
-                Published: Thu 04 January 2018
+        <abbr class="published" title="2018-01-07T00:00:00+01:00">
+                Published: Sun 07 January 2018
         </abbr>
 
         <address class="vcard author">
                 By                         <a class="url fn" href="/author/john-boudreaux.html">John Boudreaux</a>
         </address>
 <p>In <a href="/category/general.html">General</a>.</p>
-<p>tags: <a href="/tag/rugby.html">Rugby</a> <a href="/tag/sports.html">Sports</a> <a href="/tag/web-scraper.html">Web Scraper</a> </p>
+<p>tags: <a href="/tag/rugby.html">Rugby</a> <a href="/tag/sports.html">Sports</a> <a href="/tag/chi-square.html">Chi-Square</a> <a href="/tag/tableau.html">Tableau</a> </p>
 </footer><!-- /.post-info --><style type="text/css">/*!
 *
 * IPython notebook
@@ -1007,39 +1007,122 @@ h6:hover .anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>ESPN has a database of all international rugby scores for matches in the present day all the way back through the 1950s and even some earlier matches. Using  Jupyter notebooks, I wanted to go through the basic steps of building a web scraper to get this data into a more friendly format (.csv) so that I can do more analysis with it in Python or R. This web scraper is built using Python and BeautifulSoup. Let's start by taking a look at the URL of a relevant query of the last 10 years worth of international data.</p>
-<p>URL: <a href="http://stats.espnscrum.com/statsguru/rugby/stats/index.html?class=1;page=;spanmax1=08+Nov+2017;spanmax2=08+Nov+2017;spanmin1=08+Nov+2007;spanmin2=08+Nov+2015;spanval1=span;spanval2=span;template=results;type=player;view=match">http://stats.espnscrum.com/statsguru/rugby/stats/index.html?class=1;page=;spanmax1=08+Nov+2017;spanmax2=08+Nov+2017;spanmin1=08+Nov+2007;spanmin2=08+Nov+2015;spanval1=span;spanval2=span;template=results;type=player;view=match</a></p>
-<p>We can define empty arrays that we'll store all our values in for later. Also, we should go ahead and import relevant libraries to start.</p>
+<p>So in the <a href="https://boudrejp.github.io/Rugby_Web_Scraper.html">previous post</a>, I built the framework for a web scraper to have all the rugby scoring statistics for 10 years from the ESPN StatsGuru database. Now, let's get down to analyzing it.</p>
+<p>Before we do that though, we ought to discuss the data we're dealing with a little bit more and perhaps delve into a bit of explanation of how and why these outcomes might happen in a game of rugby. The scoring works relatively similar to football. You have tries (touchdowns) worth 5 points, conversions (extra points after a touchdown) worth 2 points, along with drop kicks and penalties (field goals) each worth 3 points. Any player can score by any of these means, although teams usually designate a player to do the majority of the kicking duties. These tend to be the flyhalf, fullback, or scrumhalf, but it could be any player to do it.</p>
+<p>Some of my old coaches said that certain positions are more important in terms of the overall success or failure of a team. In general, you would want to have your best player at flyhalf, second best at scrumhalf, then 8-man, fullback, hooker, and open-side flanker. These players tend to be in the most decision making situations and likely will have the ball the most. Having good players in these positions would put you in a solid place, no matter what any other team could throw against you.</p>
+<p><img alt="Rugby Union Positions" src="https://www.myactivesg.com/~/media/consumer/images/sports/rugby/5rugbypositionsforwards.jpg" /></p>
+<p>In international rugby, there are "tiers" of teams. Tier 1 nations are established rugby powerhouses and have significant talent pools to draw from. They have skilled players at every position, not just the ones listed above. Tier 2 nations tend to not have the same kind of talent to draw from, for a variety of reasons. Because of this, intuitively I'd expect the gap between the best players and the rest to be far greater than a Tier 1 nation. In particular, I'd expect those best players to be put in the more critical positions. Tier 3 is a step below Tier 2 and we would expect a similar effect. Unfortunately, data in ESPN StatsGuru is relatively sparse for the Tier 3 nations, so any sort of analysis is difficult to assert as valid with small sample size.</p>
+<p>In my previous playing experience with the University of Texas and in high school, I saw the trends in the first paragraph firsthand. Against worse competition, there tended to be a few "star" players on each team. If you shut those players down with a defensive scheme that focused on them, you could win easily. Better coached and more talented teams provided a much different challenge- everyone needed to execute a cohesive gameplan, because almost any player was capable of a breakthrough play.</p>
+<p>While not a perfect measure, I was wondering if you could see the difference in player skills through the scoring statistics from ESPN StatsGuru. Ideally, you would want to have statistics for running meters, offloads, tackles and missed tackles, and other measures to see how good each individual player was. Given that those statistics aren't readily available on a large scale, I went to see if you could determine these things in purely the scoring statistics instead.</p>
+<p>A note on the code: at the moment, I'm a little bit more comfortable with R for data analysis than Python. So we'll do this analysis in R using the <em>dplyr</em> package. So why don't we start by uploading a nice, preprocessed and cleaned version of the data frame we got from the web scraper in the last post.</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [1]:</div>
+<div class="prompt input_prompt">In [14]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">bs4</span> <span class="k">import</span> <span class="n">BeautifulSoup</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">urllib</span>
-<span class="kn">import</span> <span class="nn">lxml</span>
+<div class=" highlight hl-r"><pre><span></span><span class="kn">library</span><span class="p">(</span>dplyr<span class="p">)</span>
+df <span class="o"><-</span> read.csv<span class="p">(</span><span class="s">"C:/Users/John/Documents/GitHub/RugbyStats/preprocessed.csv"</span><span class="p">)</span>
+<span class="kp">summary</span><span class="p">(</span>df<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_text output_subarea ">
+<pre>       X             conv            country       drop_kicks     
+ Min.   :   1   Min.   : 0.0000   NZ     : 605   Min.   :0.00000  
+ 1st Qu.:2023   1st Qu.: 0.0000   JPN    : 549   1st Qu.:0.00000  
+ Median :4107   Median : 0.0000   Aust   : 461   Median :0.00000  
+ Mean   :4098   Mean   : 0.5823   SA     : 433   Mean   :0.02754  
+ 3rd Qu.:6165   3rd Qu.: 1.0000   Arg    : 416   3rd Qu.:0.00000  
+ Max.   :8213   Max.   :16.0000   Ire    : 373   Max.   :3.00000  
+                                  (Other):5116                    
+        opposition     penalties                  player         points    
+ Australia   : 415   Min.   :0.0000   M Kvirikashvili:  72   Min.   : 2.0  
+ Italy       : 414   1st Qu.:0.0000   FA Vlaicu      :  69   1st Qu.: 5.0  
+ Argentina   : 360   Median :0.0000   DW Carter      :  68   Median : 5.0  
+ South Africa: 338   Mean   :0.6525   SL Halfpenny   :  61   Mean   : 7.1  
+ Wales       : 329   3rd Qu.:1.0000   JJ Sexton      :  60   3rd Qu.: 9.0  
+ New Zealand : 328   Max.   :8.0000   M Steyn        :  60   Max.   :37.0  
+ (Other)     :5769                    (Other)        :7563                 
+    position     result         tries        country_tier   opposition_tier
+ FH     :1895   draw: 149   Min.   :0.0000   1    :3876   1         :3391  
+ W      :1546   lost:2550   1st Qu.:0.0000   2    :3675   2         :3124  
+ C      :1129   won :5254   Median :1.0000   3    : 377   3         :1399  
+ FB     : 915               Mean   :0.7791   Lions:  25   Lions/Barb:  39  
+ SH     : 616               3rd Qu.:1.0000                                 
+ F      : 610               Max.   :6.0000                                 
+ (Other):1242                                                              
+  points_tries     points_convs     points_pens      points_drops    
+ Min.   : 0.000   Min.   : 0.000   Min.   : 0.000   Min.   :0.00000  
+ 1st Qu.: 0.000   1st Qu.: 0.000   1st Qu.: 0.000   1st Qu.:0.00000  
+ Median : 5.000   Median : 0.000   Median : 0.000   Median :0.00000  
+ Mean   : 3.895   Mean   : 1.165   Mean   : 1.957   Mean   :0.08261  
+ 3rd Qu.: 5.000   3rd Qu.: 2.000   3rd Qu.: 3.000   3rd Qu.:0.00000  
+ Max.   :30.000   Max.   :32.000   Max.   :24.000   Max.   :9.00000  
+                                                                     </pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So what we have here is a data frame that has individual entries for each player per match. We have how many points they scored, how they scored them, their team and tier, opposition team and tier, and the result of the match. All of these came after some preprocessing of the data, with the tiers coming from Wikipedia (see: <a href="https://en.wikipedia.org/wiki/List_of_international_rugby_union_teams">https://en.wikipedia.org/wiki/List_of_international_rugby_union_teams</a>).</p>
+<p>The individual player stats aren't so much what I'm interested in- rather, I'd like to look at aggregates of the data to slice and dice it in different ways to answer some questions. That's where the <em>dyplr</em> package comes in- it gives us a lot of nice tools to subset and aggregate our data.</p>
+<p>Let's start off by asking how does the overall scoring profile of how Tier 1 teams score against each other compare against how Tier 2 teams score against each other. We can look at this both from the perspective of what types of scores (tries, conversions, etc) and who scores, position by position. If my hunch from the introduction is correct, we should see that important positions score more than their piers, and we should see that effect in a greater magnitude in the Tier 2 data.</p>
+<p>We can test this using a Chi Squared test, which essentially tests the overall "profile" of scoring. A low p-value essentially tells us that we can realistically say these two are different distributions. The standardized residuals will give us a feel for how the two distributions are different from each other. Let's see what the stats say:</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [15]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-r"><pre><span></span><span class="c1">###question 1: how does tier1 v tier1 scoring profile compare to tier2 v tier2</span>
+<span class="c1">###1a: types of scores 1b: who scores tries</span>
+df.test.1 <span class="o"><-</span> filter<span class="p">(</span>df<span class="p">,</span> country_tier <span class="o">==</span> <span class="m">1</span><span class="p">,</span> opposition_tier<span class="o">==</span><span class="m">1</span><span class="p">)</span>
+df.test.2 <span class="o"><-</span> filter<span class="p">(</span>df<span class="p">,</span> country_tier <span class="o">==</span> <span class="m">2</span><span class="p">,</span> opposition_tier <span class="o">==</span><span class="m">2</span><span class="p">)</span>
 
+<span class="c1">###1a-> types of scores</span>
+df.info.1 <span class="o"><-</span> 
+  df.test.1 <span class="o">%>%</span>
+    summarise<span class="p">(</span>
+      points_tries <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_tries<span class="p">),</span>
+      points_convs <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_convs<span class="p">),</span>
+      points_drops <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_drops<span class="p">),</span>
+      points_pens <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_pens<span class="p">)</span>
+    <span class="p">)</span>
 
-<span class="c1">###all of the variables that we'll be importing</span>
-<span class="n">player_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">country_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">position_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">points_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">tries_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">conv_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">pens_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">drops_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">opp_list</span> <span class="o">=</span> <span class="p">[]</span>
+df.info.2 <span class="o"><-</span> 
+  df.test.2 <span class="o">%>%</span>
+  summarise<span class="p">(</span>
+    points_tries <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_tries<span class="p">),</span>
+    points_convs <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_convs<span class="p">),</span>
+    points_drops <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_drops<span class="p">),</span>
+    points_pens <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_pens<span class="p">)</span>
+  <span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s1">'libraries successfully imported'</span><span class="p">)</span>
+chi.table <span class="o"><-</span> <span class="kp">rbind</span><span class="p">(</span>df.info.1<span class="p">,</span> df.info.2<span class="p">)</span>
+<span class="kp">rownames</span><span class="p">(</span>chi.table<span class="p">)</span> <span class="o"><-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"Tier_1"</span><span class="p">,</span> <span class="s">"Tier_2"</span><span class="p">)</span>
+chi.table <span class="o"><-</span> <span class="kp">as.data.frame</span><span class="p">(</span><span class="kp">t</span><span class="p">(</span>chi.table<span class="p">))</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Aggregates table:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chi.table<span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Results of same tier matches:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">))</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Standardized residuals:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">)</span><span class="o">$</span>stdres<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1049,7 +1132,27 @@ h6:hover .anchor-link {
 <div class="output_area">
 <div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>libraries successfully imported
+<pre>[1] "Aggregates table:"
+             Tier_1 Tier_2
+points_tries  10205   8220
+points_convs   3148   2380
+points_drops    420    114
+points_pens    7746   4569
+[1] "-----------------------------------------"
+[1] "Results of same tier matches:"
+
+	Pearson's Chi-squared test
+
+data:  chi.table
+X-squared = 266.47, df = 3, p-value < 2.2e-16
+
+[1] "-----------------------------------------"
+[1] "Standardized residuals:"
+                 Tier_1     Tier_2
+points_tries -12.028367  12.028367
+points_convs  -2.497545   2.497545
+points_drops   9.532507  -9.532507
+points_pens   12.220962 -12.220962
 </pre>
 </div>
 </div>
@@ -1060,96 +1163,40 @@ h6:hover .anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>With that out of the way, now we can get to the actual scraper. Let's define a string, that we can iterate through for each individual page for all the pages. There were 1601 pages the last time I checked.</p>
+<p>Our first output is simply the aggregated numbers. At first glance, we can see that Tier 1 teams score more in every category, and that it looks like they score a lot more penalties than Tier 2. With the Chi Squared test, we ask "are the proportions of these two the same" or "what's the likelihood that these two follow fundamentally the same proportions for each category?" The answer, from the low p-value, is that Tier 1 teams don't score their points in the same manner that Tier 2 teams do. The residuals give us a feel for how much they are different. These are standardized residuals, so they are scaled by a factor of the overall variance in the data. Basically, this just means you can't interpret them directly as "Tier 2 scores 12 times more tries than Tier 1 in this analysis."</p>
+<p>Anyways, this falls in line more or less with my presumptions. Kicking game is done by very skilled players, and those skilled players are more likely to be on good teams. However, Tier 1 games tend to be closer and more competitive than Tier 2 games, and this could be because points are at a premium and you have to take advantage for any oppportunity for points. Therefore, you take the penalty or drop goal as a "sure bet" instead of gambling to get a try.</p>
+<p>Let's take a look at the positions themselves:</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [2]:</div>
+<div class="prompt input_prompt">In [16]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">table_url_page</span><span class="p">(</span><span class="n">page</span><span class="p">):</span>
-	<span class="k">return</span><span class="p">(</span><span class="s1">'http://stats.espnscrum.com/statsguru/rugby/stats/index.html?class=1;page='</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">page</span><span class="p">)</span> <span class="o">+</span>
-	<span class="s1">';spanmax1=08+Nov+2017;spanmax2=08+Nov+2017;spanmin1=08+Nov+2007;spanmin2=08+Nov+2015;'</span> <span class="o">+</span> 
-	<span class="s1">'spanval1=span;spanval2=span;template=results;type=player;view=match'</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>For the sake of this being an example, I'll only do one page. But to create this into a web scraper to get information from all 1061 pages, you would simply need to iterate over all the page numbers and store the values in the arrays we defined in cell 1. It would also be good practice to have a slight delay between each iteration, to not create too many requests at one time.</p>
-<p>But let's go ahead and start with the first page, page 1.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [3]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">page</span> <span class="o">=</span> <span class="mi">1</span>
+<div class=" highlight hl-r"><pre><span></span><span class="c1">###1b-> who scores</span>
+df.info.1 <span class="o"><-</span> 
+  df.test.1 <span class="o">%>%</span>
+    group_by<span class="p">(</span>position<span class="p">)</span> <span class="o">%>%</span>
+      summarize<span class="p">(</span>points <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points<span class="p">))</span>
 
-<span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">table_url_page</span><span class="p">(</span><span class="n">page</span><span class="p">))</span> <span class="k">as</span> <span class="n">url</span><span class="p">:</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+df.info.2 <span class="o"><-</span> 
+  df.test.2 <span class="o">%>%</span>
+    group_by<span class="p">(</span>position<span class="p">)</span> <span class="o">%>%</span>
+      summarize<span class="p">(</span>points <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points<span class="p">))</span>
 
-<span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="c1">#print(soup) </span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, I'm just going to ask that you trust me here instead of showing all the results. If you have a burning desire to scroll through about 3000 lines of code that are powering the back end of this website, then I encourage you to print the output on your own device. As a small taste, you're looking at stuff like this:</p>
-<p>&lt;!DOCTYPE html&gt;<br />&lt;!-- hostname: web005, country: us, cluster: na, created: 2018-01-06 03:57:47 --&gt;&lt;html xmlns="<a href='http://www.w3.org/1999/xhtml"&amp;gt'>http://www.w3.org/1999/xhtml"&amp;gt</a>;<br />&lt;head&gt;<br />&lt;meta content="text/html;charset=utf-8" http-equiv="Content-Type"/&gt;<br />&lt;meta content="IE=edge" http-equiv="X-UA-Compatible"/&gt;<br />&lt;script type="text/javascript"&gt;var _sf_startpt=(new Date()).getTime()&lt;/script&gt;<br />&lt;title&gt;Rugby Union - ESPN Scrum - Statsguru - Test matches - Player records&lt;/title&gt;<br />&lt;meta content="text/html;charset=utf-8" http-equiv="Content-Type"/&gt;<br /></p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>So that's the code that our web browser is interpreting when we see that page- and it's a lot. If you go through it about midway down, you start seeing things like country names, numbers, and player names- that's the stuff we want. With BeautifulSoup, we can filter through everything else around it by explicitly telling it what brackets (<strong><em>&lt;&gt;stuff we're looking for&lt;/&gt;</em></strong>) to look for. We'll start off by looking at all of the items in the &lt;tr&gt; tag, since it looks like all of the data is contained there in the "data1" class.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [4]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">table_entries</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"tr"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"data1"</span><span class="p">)</span>
-<span class="c1">#print(table_entries)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Yet again- the output here is pretty lengthy, but much more manageable. As a sample, here's the first few lines we get back:</p>
-<p>[&lt;tr class="data1"&gt;<br />&lt;td class="left" nowrap=""&gt;&lt;a class="data-link" href="/statsguru/rugby/player/14792.html"&gt;A Goromaru&lt;/a&gt; &lt;i&gt;(JPN)&lt;/i&gt;&lt;/td&gt;<br />&lt;td class="left"&gt;FB&lt;/td&gt;<br />&lt;td&gt;&lt;b&gt;37&lt;/b&gt;&lt;/td&gt;<br />&lt;td&gt;1&lt;/td&gt;<br />&lt;td&gt;16&lt;/td&gt;<br />&lt;td&gt;0&lt;/td&gt;<br />&lt;td&gt;0&lt;/td&gt;<br />&lt;td class="left"&gt;won&lt;/td&gt;<br />&lt;td&gt;&lt;/td&gt;<br />&lt;td class="left" nowrap=""&gt;v Sri Lanka&lt;/td&gt;<br />&lt;td class="left" nowrap=""&gt;&lt;a class="data-link" href="/statsguru/rugby/ground/16654.html"&gt;Nagoya&lt;/a&gt;&lt;/td&gt;<br />&lt;td nowrap=""&gt;10 May 2014&lt;/td&gt;<br /></p>
-<p>This is significantly filtered down, and has some structure that we can follow. Player name is the first entry followed by country, number of points, tries, conversions, and so on... We can apply same method over again to get the exact names and values out of this. While we're at it, why don't we go ahead and count the number of entries on each page.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [5]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">entries_on_page</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">table_entries</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">entries_on_page</span><span class="p">)</span>
+chi.table <span class="o"><-</span> <span class="kp">cbind</span><span class="p">(</span>df.info.1<span class="p">,</span> df.info.2<span class="p">)</span>
+<span class="kp">rownames</span><span class="p">(</span>chi.table<span class="p">)</span> <span class="o"><-</span> chi.table<span class="p">[[</span><span class="m">1</span><span class="p">]]</span>
+chi.table <span class="o"><-</span> chi.table<span class="p">[,</span><span class="kt">c</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">4</span><span class="p">)]</span>
+<span class="kp">colnames</span><span class="p">(</span>chi.table<span class="p">)</span> <span class="o"><-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"Tier_1"</span><span class="p">,</span> <span class="s">"Tier_2"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Aggregates table:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chi.table<span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Results of who scores in same tier matches:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">))</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Standardized residuals:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">)</span><span class="o">$</span>stdres<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1159,7 +1206,39 @@ h6:hover .anchor-link {
 <div class="output_area">
 <div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>50
+<pre>[1] "Aggregates table:"
+   Tier_1 Tier_2
+C    2721   1920
+F     935    968
+FB   1924   2825
+FH   8755   3825
+H     410    428
+L     480    577
+N8    548    654
+P     390    435
+SH   1787   1145
+W    3569   2506
+[1] "-----------------------------------------"
+[1] "Results of who scores in same tier matches:"
+
+	Pearson's Chi-squared test
+
+data:  chi.table
+X-squared = 1578.1, df = 9, p-value < 2.2e-16
+
+[1] "-----------------------------------------"
+[1] "Standardized residuals:"
+        Tier_1      Tier_2
+C    0.2325391  -0.2325391
+F   -8.4903283   8.4903283
+FB -26.9110322  26.9110322
+FH  31.2046226 -31.2046226
+H   -5.6730578   5.6730578
+L   -8.7436384   8.7436384
+N8  -9.2149215   9.2149215
+P   -6.6025285   6.6025285
+SH   2.8358316  -2.8358316
+W    0.4788128  -0.4788128
 </pre>
 </div>
 </div>
@@ -1170,20 +1249,39 @@ h6:hover .anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>So we have 50 data entries- that's a little big for an example. We'll go about making sure that we accurately scrape the first 3 entries, because we can easily change 3 to 50 if we have it all correct. If we look at the the result from box 4, we can see what tags are around the data we want to grab, and use BeautifulSoup to get the text out of there for us. Let's start with getting the player name from the first entry.</p>
+<p>With these results, it's difficult to tell what we ought to take away from this. My takeaway is that it's difficult to distinguish a player's contributions when differnt players might be doing kicking duties. For example, the huge disparities between FB and FH (fullback and flyhalf) could hypothetically be that in Tier 1 teams, more fullbacks do kicking duties than flyhalves. Kickers numbers for scoring get inflated significanty, and it skews the rest of our numbers here.</p>
+<p>Why don't we try doing the same analysis for tries only, where we ought to see a more even distribution between positions:</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [6]:</div>
+<div class="prompt input_prompt">In [17]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">entry</span> <span class="o">=</span> <span class="n">table_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-<span class="n">player</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"data-link"</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">player</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+<div class=" highlight hl-r"><pre><span></span><span class="c1">###1b-> who scores</span>
+df.info.1 <span class="o"><-</span> 
+  df.test.1 <span class="o">%>%</span>
+    group_by<span class="p">(</span>position<span class="p">)</span> <span class="o">%>%</span>
+      summarize<span class="p">(</span>tries <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>tries<span class="p">))</span>
+
+df.info.2 <span class="o"><-</span> 
+  df.test.2 <span class="o">%>%</span>
+    group_by<span class="p">(</span>position<span class="p">)</span> <span class="o">%>%</span>
+      summarize<span class="p">(</span>tries <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>tries<span class="p">))</span>
+
+chi.table <span class="o"><-</span> <span class="kp">cbind</span><span class="p">(</span>df.info.1<span class="p">,</span> df.info.2<span class="p">)</span>
+<span class="kp">rownames</span><span class="p">(</span>chi.table<span class="p">)</span> <span class="o"><-</span> chi.table<span class="p">[[</span><span class="m">1</span><span class="p">]]</span>
+chi.table <span class="o"><-</span> chi.table<span class="p">[,</span><span class="kt">c</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">4</span><span class="p">)]</span>
+<span class="kp">colnames</span><span class="p">(</span>chi.table<span class="p">)</span> <span class="o"><-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"Tier_1"</span><span class="p">,</span> <span class="s">"Tier_2"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Aggregates table:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chi.table<span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Results of who scores tries in same tier matches:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">))</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Standardized residuals:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">)</span><span class="o">$</span>stdres<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1193,7 +1291,39 @@ h6:hover .anchor-link {
 <div class="output_area">
 <div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>A Goromaru
+<pre>[1] "Aggregates table:"
+   Tier_1 Tier_2
+C     385    227
+F     187    193
+FB    193    154
+FH    116     62
+H      82     85
+L      96    115
+N8    109    129
+P      78     87
+SH    159    116
+W     636    476
+[1] "-----------------------------------------"
+[1] "Results of who scores tries in same tier matches:"
+
+	Pearson's Chi-squared test
+
+data:  chi.table
+X-squared = 53.179, df = 9, p-value = 2.703e-08
+
+[1] "-----------------------------------------"
+[1] "Standardized residuals:"
+        Tier_1      Tier_2
+C   4.09920548 -4.09920548
+F  -2.55746440  2.55746440
+FB  0.09169869 -0.09169869
+FH  2.69120230 -2.69120230
+H  -1.67221827  1.67221827
+L  -2.97622467  2.97622467
+N8 -3.07678439  3.07678439
+P  -2.14530066  2.14530066
+SH  0.84322506 -0.84322506
+W   1.45112448 -1.45112448
 </pre>
 </div>
 </div>
@@ -1204,63 +1334,48 @@ h6:hover .anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Got it, just how we wanted it. Now we can repeat for all the fields we care about.</p>
+<p>I have to admit... this is a lot different than I expected it to be. The differences between 8-man and center stick out the most, but this doesn't exactly fall in line with the "critical positions" thought from earlier. This could be for a variety of reasons, but at this point I think it wouldn't be completely unreasonable to say this thought process might be wrong. Alternatively, using scoring as the only method to judge this could just be a bad way to measure it, rather than having running meters, offloads, etc.</p>
+<p>Anyways, up to this point we've only looked at same-tier matchups. What about when a team plays a team of a lower tier? I think we would probably see a lot more tries and conversions, and far fewer conversions and drop goals. It ought to be easier to score against a team significantly worse than you, so you might as well try to get it in big chunks. I'd also expect the distribution of who scores tries to be more even here, simply because the ball will just get passed around more.</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [7]:</div>
+<div class="prompt input_prompt">In [18]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">entry</span> <span class="o">=</span> <span class="n">table_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<div class=" highlight hl-r"><pre><span></span>df.test.1 <span class="o"><-</span> filter<span class="p">(</span>df<span class="p">,</span> country_tier <span class="o">==</span> <span class="m">1</span><span class="p">,</span> opposition_tier<span class="o">==</span><span class="m">2</span><span class="p">)</span>
+df.test.2 <span class="o"><-</span> filter<span class="p">(</span>df<span class="p">,</span> country_tier <span class="o">==</span> <span class="m">2</span><span class="p">,</span> opposition_tier <span class="o">==</span><span class="m">3</span><span class="p">)</span>
 
-<span class="n">player</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"data-link"</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">player</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+df.info.1 <span class="o"><-</span> 
+  df.test.1 <span class="o">%>%</span>
+  summarise<span class="p">(</span>
+    points_tries <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_tries<span class="p">),</span>
+    points_convs <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_convs<span class="p">),</span>
+    points_drops <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_drops<span class="p">),</span>
+    points_pens <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_pens<span class="p">)</span>
+  <span class="p">)</span>
 
-<span class="n">country</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"i"</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">country</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">country</span><span class="p">)</span>
-<span class="c1">##get rid of parentheses around country abbreviation</span>
-<span class="n">country</span> <span class="o">=</span> <span class="n">country</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"("</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
-<span class="n">country</span> <span class="o">=</span> <span class="n">country</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">")"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+df.info.2 <span class="o"><-</span> 
+  df.test.2 <span class="o">%>%</span>
+  summarise<span class="p">(</span>
+    points_tries <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_tries<span class="p">),</span>
+    points_convs <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_convs<span class="p">),</span>
+    points_drops <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_drops<span class="p">),</span>
+    points_pens <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>points_pens<span class="p">)</span>
+  <span class="p">)</span>
 
-<span class="n">position</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">position</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-
-<span class="n">points_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"b"</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">points_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">points_scored</span><span class="p">)</span>
-
-<span class="n">tries_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">tries_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tries_scored</span><span class="p">)</span>
-
-<span class="n">conversions_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">)[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">conversions_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">conversions_scored</span><span class="p">)</span>
-
-<span class="n">penalties_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">)[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">penalties_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">penalties_scored</span><span class="p">)</span>
-
-<span class="n">drops_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">)[</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">drops_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">drops_scored</span><span class="p">)</span>
-
-<span class="n">result</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-<span class="n">opposition</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-<span class="n">opposition</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">opposition</span><span class="p">)</span>
-<span class="n">opposition</span> <span class="o">=</span> <span class="n">opposition</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"v "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"This was entry number </span><span class="si">%d</span><span class="s2">"</span> <span class="o">%</span><span class="k">i</span>)
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Player is "</span> <span class="o">+</span> <span class="n">player</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Country is "</span> <span class="o">+</span> <span class="n">country</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Position is "</span> <span class="o">+</span> <span class="n">position</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">points_scored</span> <span class="o">+</span> <span class="s2">" points"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">tries_scored</span> <span class="o">+</span> <span class="s2">" tries"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">conversions_scored</span> <span class="o">+</span> <span class="s2">" conversions"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">penalties_scored</span> <span class="o">+</span> <span class="s2">" pens"</span><span class="p">)</span> 
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">drops_scored</span> <span class="o">+</span> <span class="s2">" drop goals"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Result of game was "</span> <span class="o">+</span> <span class="n">result</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"The opposition was "</span> <span class="o">+</span> <span class="n">opposition</span><span class="p">)</span>
+chi.table <span class="o"><-</span> <span class="kp">rbind</span><span class="p">(</span>df.info.1<span class="p">,</span> df.info.2<span class="p">)</span>
+<span class="kp">rownames</span><span class="p">(</span>chi.table<span class="p">)</span> <span class="o"><-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"Tier_1"</span><span class="p">,</span> <span class="s">"Tier_2"</span><span class="p">)</span>
+chi.table <span class="o"><-</span> <span class="kp">as.data.frame</span><span class="p">(</span><span class="kp">t</span><span class="p">(</span>chi.table<span class="p">))</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Aggregates table:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chi.table<span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Results of matches against lower tier:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">))</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Standardized residuals:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">)</span><span class="o">$</span>stdres<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1270,17 +1385,27 @@ h6:hover .anchor-link {
 <div class="output_area">
 <div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>This was entry number 1
-Player is A Goromaru
-Country is JPN
-Position is FB
-Scored 36 points
-Scored 1 tries
-Scored 14 conversions
-Scored 1 pens
-Scored 0 drop goals
-Result of game was won
-The opposition was Philippines
+<pre>[1] "Aggregates table:"
+             Tier_1 Tier_2
+points_tries   3255   6120
+points_convs    998   1820
+points_drops     21     51
+points_pens     894    774
+[1] "-----------------------------------------"
+[1] "Results of matches against lower tier:"
+
+	Pearson's Chi-squared test
+
+data:  chi.table
+X-squared = 222.68, df = 3, p-value < 2.2e-16
+
+[1] "-----------------------------------------"
+[1] "Standardized residuals:"
+                Tier_1     Tier_2
+points_tries -8.312002   8.312002
+points_convs -2.062895   2.062895
+points_drops -1.395742   1.395742
+points_pens  14.873668 -14.873668
 </pre>
 </div>
 </div>
@@ -1291,64 +1416,39 @@ The opposition was Philippines
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Perfect. Now if we throw this in a loop, we'll be able to get all the entries on the page. But for the sake of being concise, we'll do only 3 and print the results.</p>
+<p>Overall, we see the same trend: the value of penalties an drop goals decreases when it's easier to score points by tries and consequently conversions. We see that the Tier 1 nations, which tend to have more skilled kickers, still opt for kicking points at a much higher rate than the Tier 2 nations. Also, the drop off between Tier 2 and Tier 3 is larger than Tier 1 to Tier 2. A good Tier 2 nation can rack up serious points against an average Tier 3 opponent.</p>
+<p>Let's take a look at who scores, tries only this time:</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In [8]:</div>
+<div class="prompt input_prompt">In [19]:</div>
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="o">+</span><span class="mi">1</span><span class="p">))):</span>
+<div class=" highlight hl-r"><pre><span></span><span class="c1">###2b-> who scores</span>
+df.info.1 <span class="o"><-</span> 
+  df.test.1 <span class="o">%>%</span>
+    group_by<span class="p">(</span>position<span class="p">)</span> <span class="o">%>%</span>
+      summarize<span class="p">(</span>tries <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>tries<span class="p">))</span>
 
-    <span class="n">entry</span> <span class="o">=</span> <span class="n">table_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-    <span class="n">player</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"data-link"</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">player</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">player</span><span class="p">)</span>
+df.info.2 <span class="o"><-</span> 
+  df.test.2 <span class="o">%>%</span>
+    group_by<span class="p">(</span>position<span class="p">)</span> <span class="o">%>%</span>
+      summarize<span class="p">(</span>tries <span class="o">=</span> <span class="kp">sum</span><span class="p">(</span>tries<span class="p">))</span>
 
-    <span class="n">country</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"i"</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">country</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">country</span><span class="p">)</span>
-    <span class="c1">##get rid of parentheses around country abbreviation</span>
-    <span class="n">country</span> <span class="o">=</span> <span class="n">country</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"("</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
-    <span class="n">country</span> <span class="o">=</span> <span class="n">country</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">")"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
-
-    <span class="n">position</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">position</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
-
-    <span class="n">points_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"b"</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">points_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">points_scored</span><span class="p">)</span>
-
-    <span class="n">tries_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">tries_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tries_scored</span><span class="p">)</span>
-
-    <span class="n">conversions_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">)[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">conversions_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">conversions_scored</span><span class="p">)</span>
-
-    <span class="n">penalties_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">)[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">penalties_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">penalties_scored</span><span class="p">)</span>
-
-    <span class="n">drops_scored</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">)[</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">drops_scored</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">drops_scored</span><span class="p">)</span>
-
-    <span class="n">result</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-
-    <span class="n">opposition</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s2">"td"</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
-    <span class="n">opposition</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">opposition</span><span class="p">)</span>
-    <span class="n">opposition</span> <span class="o">=</span> <span class="n">opposition</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"v "</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"This was entry number </span><span class="si">%d</span><span class="s2">"</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Player is "</span> <span class="o">+</span> <span class="n">player</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Country is "</span> <span class="o">+</span> <span class="n">country</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Position is "</span> <span class="o">+</span> <span class="n">position</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">points_scored</span> <span class="o">+</span> <span class="s2">" points"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">tries_scored</span> <span class="o">+</span> <span class="s2">" tries"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">conversions_scored</span> <span class="o">+</span> <span class="s2">" conversions"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">penalties_scored</span> <span class="o">+</span> <span class="s2">" pens"</span><span class="p">)</span> 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Scored "</span> <span class="o">+</span> <span class="n">drops_scored</span> <span class="o">+</span> <span class="s2">" drop goals"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"Result of game was "</span> <span class="o">+</span> <span class="n">result</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">"The opposition was "</span> <span class="o">+</span> <span class="n">opposition</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+chi.table <span class="o"><-</span> <span class="kp">cbind</span><span class="p">(</span>df.info.1<span class="p">,</span> df.info.2<span class="p">)</span>
+<span class="kp">rownames</span><span class="p">(</span>chi.table<span class="p">)</span> <span class="o"><-</span> chi.table<span class="p">[[</span><span class="m">1</span><span class="p">]]</span>
+chi.table <span class="o"><-</span> chi.table<span class="p">[,</span><span class="kt">c</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">4</span><span class="p">)]</span>
+<span class="kp">colnames</span><span class="p">(</span>chi.table<span class="p">)</span> <span class="o"><-</span> <span class="kt">c</span><span class="p">(</span><span class="s">"Tier_1"</span><span class="p">,</span> <span class="s">"Tier_2"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Aggregates table:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chi.table<span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Results of who scores tries in matches against lower tier:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">))</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"-----------------------------------------"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span><span class="s">"Standardized residuals:"</span><span class="p">)</span>
+<span class="kp">print</span><span class="p">(</span>chisq.test<span class="p">(</span>chi.table<span class="p">)</span><span class="o">$</span>stdres<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1358,42 +1458,39 @@ The opposition was Philippines
 <div class="output_area">
 <div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>This was entry number 1
-Player is A Goromaru
-Country is JPN
-Position is FB
-Scored 37 points
-Scored 1 tries
-Scored 16 conversions
-Scored 0 pens
-Scored 0 drop goals
-Result of game was won
-The opposition was Sri Lanka
+<pre>[1] "Aggregates table:"
+   Tier_1 Tier_2
+C     108    184
+F      68    183
+FB     53    113
+FH     37     63
+H      41     68
+L      27     82
+N8     35    106
+P      25     47
+SH     37     57
+W     220    321
+[1] "-----------------------------------------"
+[1] "Results of who scores tries in matches against lower tier:"
 
-This was entry number 2
-Player is A Goromaru
-Country is JPN
-Position is FB
-Scored 36 points
-Scored 1 tries
-Scored 14 conversions
-Scored 1 pens
-Scored 0 drop goals
-Result of game was won
-The opposition was Philippines
+	Pearson's Chi-squared test
 
-This was entry number 3
-Player is D Mukidza Kinyangi
-Country is Kenya
-Position is W
-Scored 36 points
-Scored 3 tries
-Scored 9 conversions
-Scored 1 pens
-Scored 0 drop goals
-Result of game was won
-The opposition was Tunisia
+data:  chi.table
+X-squared = 28.495, df = 9, p-value = 0.0007882
 
+[1] "-----------------------------------------"
+[1] "Standardized residuals:"
+          Tier_1        Tier_2
+C   0.8852976971 -0.8852976971
+F  -2.7276968703  2.7276968703
+FB -0.7915240358  0.7915240358
+FH  0.4922167326 -0.4922167326
+H   0.6540922442 -0.6540922442
+L  -2.2481933221  2.2481933221
+N8 -2.5669810758  2.5669810758
+P   0.0004039025 -0.0004039025
+SH  0.9699066544 -0.9699066544
+W   3.4436976392 -3.4436976392
 </pre>
 </div>
 </div>
@@ -1404,8 +1501,16 @@ The opposition was Tunisia
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We now have the framework of what we need to do in order to create a csv. All we need to do is loop for all the table entries on the page, within a larger loop of going through all the pages. We can store each entry as an item in an array, and then create a data frame using <strong>pandas</strong>. We can then call .to_csv and we'll have our data frame.</p>
-<p>With the next post, I'll go into a little bit of analysis of the stats of what we have after all this web scraping.</p>
+<p>We can see that both tiers of teams clearly value wings that are "finishers" and score often. A good team will find a way to work the ball to the wing and let them score. Teams that aren't as skilled with ball movement likely wouldn't see the wings be quite as important- a possible reason for the lower result for Tier 2.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So now that we've done a bunch of statistics, we're probably overdue for visualizations. I've put all the data from the database into a <a href="https://public.tableau.com/shared/BN86S2J76?:display_count=yes">Tableau story</a>, where you can look through a bunch of different views of the data and draw conclusions of your own.</p>
+<p>I've got a few more projects that I've been working on recently, and look forward to doing the write up on those. I'll be doing some more traditional machine learning projects. Until then, happy exploring!</p>
 </div>
 </div>
 </div>
@@ -1440,6 +1545,39 @@ The opposition was Tunisia
 </script>
                 </article>
             </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="/Rugby_Web_Scraper.html" rel="bookmark"
+                           title="Permalink to Building a web scraper for international rugby scoring">Building a web scraper for international rugby scoring</a></h1>
+                </header>
+
+                <div class="entry-content">
+<footer class="post-info">
+        <abbr class="published" title="2018-01-04T00:00:00+01:00">
+                Published: Thu 04 January 2018
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="/author/john-boudreaux.html">John Boudreaux</a>
+        </address>
+<p>In <a href="/category/general.html">General</a>.</p>
+<p>tags: <a href="/tag/rugby.html">Rugby</a> <a href="/tag/sports.html">Sports</a> <a href="/tag/web-scraper.html">Web Scraper</a> </p>
+</footer><!-- /.post-info -->                
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>ESPN has a database of all international rugby scores for matches in the present day all the way back through the 1950s and even some earlier matches. Using  Jupyter notebooks, I wanted to go through the basic steps of building a web scraper to get this data into a more friendly format (.csv) so that I can do more analysis with it in Python or R. This web scraper is built using Python and BeautifulSoup. Let's start by taking a look at the URL of a relevant query of the last 10 years worth of international data.</p>
+                <a class="readmore" href="/Rugby_Web_Scraper.html">read more</a>
+                </div><!-- /.entry-content -->
+            </article></li>
+                </ol><!-- /#posts-list -->
+                </section><!-- /#content -->
         <section id="extras" class="body">
                 <div class="blogroll">
                         <h2>links</h2>
