@@ -1,2 +1,2 @@
 # boudrejp.github.io
-A few webpages to describe various side projects in other repositories
+My personal website, full of different things that may or may not be related.
