@@ -40,6 +40,30 @@
         padding: 20px;
       }
 
+      .collapsible {
+        background-color: white;
+        color: black;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: 1px solid black;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+      }
+
+      .active, .collapsible:hover {
+        background-color: #c8c8c8;
+      }
+
+      .content {
+        padding: 0 18px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+        background-color: #f1f1f1
+      }
+
     </style>
     <!-- Custom styles for this template -->
     <link href="../css/starter-template.css" rel="stylesheet">
@@ -118,10 +142,68 @@
       <div class="column">
         <p class="lead">In case you like graphics and lists...</p>
         <br>
-        <p>More coming soon- but in the meantime, you can take a look at a <a href="./BoudreauxJohnResume20200818.pdf">pdf resume here</a>.</p>
+        <p>In case you're just looking for a pdf resume, <a href="./BoudreauxJohnResume20200818.pdf">here it is</a>. Another way to get the bullet points would be to look at my <a href="https://www.linkedin.com/in/boudreauxjohn/">LinkedIn Page</a>. </p>
+        <h5>Work Experience (click for more details):</h5>
+        <button class="collapsible"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/BASF-Logo_bw.svg/1920px-BASF-Logo_bw.svg.png" width="100" height="30" alt="BASF">  Data Scientist (February 2017 - present)</button>
+        <div class="content">
+          <p>This began as a part of BASF's rotational new hire program, but turned into my full time role after 8 months. My role primarily is to identify and scope use cases to bring data science and analytics for manufacturing use cases, usually for process optimization. Deliverables can range from written reports, field experiments, self-suffiencent web applications, APIs around machine learning models, or anything else that the use case requires. A typical tech stack includes Python/R, Docker, Kubernetes, and MS Azure.
+          <br><Br> In addition to the more nitty gritty coding parts of the job, I give internal trainings around data science concepts for leadership level as well as hands-on courses for engineers. To further grow BASF's data science talent pool, I also manage and mentor data science and engineering graduates in BASF's rotational programs.
+        </p>
+        </div>
+        <button class="collapsible"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/BASF-Logo_bw.svg/1920px-BASF-Logo_bw.svg.png" width="100" height="30" alt="BASF">  Market Specialist (June 2016 - January 2017)</button>
+        <div class="content">
+          <p>This was an 8 month rotation as a part of BASF's new hire rotational program. In this role, I created a MS Access tool for salespeople to better store and manage data around customer expected purchasing volume. I also performed analysis and reported on various aspects of the industrial petrochemical market in North America. For many of these analyses, I was able to bring mathematical rigor into the role by using techniques like linear programming and hypothesis testing. Many of these analyses were automated using Excel Macros.</p>
+        </div>
+        <button class="collapsible"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/BASF-Logo_bw.svg/1920px-BASF-Logo_bw.svg.png" width="100" height="30" alt="BASF">  Quality Engineer (September 2015 - May 2016)</button>
+        <div class="content">
+          <p>This was an 8 month rotation as a part of BASF's new hire rotational program. I used Lean Six Sigma methodology to analyze root causes for manufacturing defects and inefficiencies. This applied to aspects of formulatioms, process cycle times, machine malfunctions, and many other parts of the process.</p>
+        </div>
+        <button class="collapsible"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/BASF-Logo_bw.svg/1920px-BASF-Logo_bw.svg.png" width="100" height="30" alt="BASF">  Production Engineer Intern (May 2014 - August 2014)</button>
+        <div class="content">
+          <p>In this 3 month internship, I assumed responsibility for the day-to-day operations of demineralized water, cogeneration, and steam operations for a multi-plant site. I analyzed data trends for events that could require escalation, and at times had to collect samples in order to recommend chemical additive adjustments. I also researched, ran financial scenarios, and delivered a written report for a new chemical process technology that was applicable to the process.</p>
+        </div>
+        <button class="collapsible"> <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/55/Solvay_S.A._logo.svg/1920px-Solvay_S.A._logo.svg.png" width="90" height="30" alt="Solvay">  Logistics Procurement Intern (May 2013 - August 2013)</button>
+        <div class="content">
+          <p>In this 3 month internship, I researched and reported various aspects of rail shipping to suggest new KPIs for the business to consider. Additionally, I trained myself on the new Chemlogix Sterling TMS software system and wrote an instruction manual for other users in the company. I also evaluated suppliers as a part of an RFI and bid process.</p>
+        </div>
+        <h4>Education:</h4>
+        <button class="collapsible"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Seal_of_University_of_California%2C_Berkeley.svg/150px-Seal_of_University_of_California%2C_Berkeley.svg.png" width="50" height="50" alt="UC Berkeley">  MIDS, University of California - Berkeley 2020</button>
+        <div class="content">
+          <p>I completed UC Berkeley's Master of Information and Data Science program from the School of Information in the summer of 2020. I completed all coursework and projects while working full time, which allowed for a great experience of learning concepts one day and using them in my job the next. My final capstone project revolved around image augmentation to lessen the effects of distribution gaps that exist in datasets, which can be seen in my projects.</p>
+        </div>
+        <button class="collapsible"> <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/University_of_Texas_at_Austin_seal.svg/800px-University_of_Texas_at_Austin_seal.svg.png" width="50" height="50" alt="UT Austin">  BS ChE, University of Texas - Austin 2015</button>
+        <div class="content">
+          <p>I graduated from UT Austin with a BS in Chemical engineering and also completed a Business Foundations Certificate, UT's version of a business minor. I was heavily involved with chemical engineering organizations like AIChE. My main organizational affiliation, however, was with UT's rugby team where I started all 4 years and held officer positions like president, vice president, and recruiting officer.</p>
+        </div>
+        <h4>Skills:</h4>
+        <button class="collapsible">A lot!</button>
+        <div class="content">
+          <p>Excuse the mess while this section is still being worked on, I have plans for a nice D3 visualization. In the meantime, I'm proficient in R and Python, and knowledgeable in SQL. I have experience with Spark, bash scripting, Docker, and Kubernetes. My main front end tools are R Shiny and Dash, although I am using this website to get more experience with HTML + Javascript and especially D3. I am knowledgeable about statistics and machine learning methods. For now, I'll leave the rest for the viz when it comes!</p>
+        </div>
+        <h4>Projects:</h4>
+        <button class="collapsible">Research Project: Targeting the Distribution Gap using Augmentation</button>
+        <div class="content">
+          <p>This project was done with the partnership of other UC Berkeley MIDS students as a part of the program capstone. We explored using different types of data augmentation to create different datasets in order to observe if they effectively changed models' performance across datasets. This work followed up on previous work coming out of UC Berkeley, which found the existence of a distribution gap across classifiers for CIFAR-10 and Imagenet (Recht et al, 2019). A full writeup can be seen <a href="http://people.ischool.berkeley.edu/~john.boudreaux/w210/Targeting_the_Distribution_Gap_using_Augmentation.pdf">here</a>, and the github repository is <a href="https://github.com/danzisar/w210-capstone">here</a>. </p>
+        </div>
       </div>
     </div>
 </main><!-- /.container -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+      <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.maxHeight){
+            content.style.maxHeight = null;
+          } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
+        });
+      }
+      </script>
 </html>
