@@ -29,6 +29,41 @@
           font-size: 3.5rem;
         }
       }
+
+      .row {
+        display: flex;
+      }
+
+      .column {
+        flex: 50%;
+        text-align: left;
+        padding: 20px;
+      }
+
+      .collapsible {
+        background-color: white;
+        color: black;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: 1px solid black;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+      }
+
+      .active, .collapsible:hover {
+        background-color: #c8c8c8;
+      }
+
+      .content {
+        padding: 0 18px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+        background-color: #f1f1f1
+      }
+
     </style>
     <!-- Custom styles for this template -->
     <link href="../css/starter-template.css" rel="stylesheet">
@@ -68,9 +103,107 @@
 
   <div class="starter-template">
     <h1>About Me</h1><br>
+    <!--
     <p class="lead"> More coming soon- but in the meantime, you can take a look at a <a href="./BoudreauxJohnResume20200818.pdf">pdf resume here</a>. </p></div>
-
+    -->
+    <div class="row">
+      <div class="column">
+        <p class="lead">In case you like a story...</p><br>
+        <p>I'm a person that's been generally been interested in computers since I started gaming with them when I was young. That interest has taken a lot of forms over the years, beginning in high school when I was introduced to coding in Visual Basic and some software programs that dealt with mathematical concepts like <a href="https://www.dynamicgeometry.com/">Geometer's Sketchpad</a>. Having computers as a means to implement algorithmic solutions was really interesting back then, and still is now. I also came across <a href="https://books.google.com/books/about/Complexity.html?id=JTRJxYK_tZsC">Complexity: The Emerging Science at the Edge of Order and Chaos</a>, a book that further piqued my interest in the intersection of mathematics and computers. I knew this type of subject matter interested me but didn't know how to get into it without pursuing a PhD, which is a lot of commitment upfront when choosing a college major. I have some family in the chemical industry, who showed me some interesting aspects of chemical engineering. This ultimately ended up being my major at the University of Texas at Austin.</p> <br>
+        <p>At UT, I simultaneously enjoyed and endured 4 years of engineering school. I had a few internships along the way, the first of which with a startup oil and gas company doing various things like accounting work and analyzing drill logs. This was followed by working in supply chain procurement for Solvay Chemicals. After that, I landed an internship with BASF where I got a lot more hands-on work with day-to-day operations of a utilities plant at the Geismar, Lousiana site. One of the more interesting aspects of that was performing analysis in various time scales, forecasting what savings alternative process technologies could provide. In the classroom, I mostly enjoyed classes that had programming elements like numerical methods. Outside of the classroom, I played 4 years of rugby for UT while holding officer positions like president and vice president.</p> <br>
+        <p>Upon graduation, I took a full-time role with BASF. The role was intentionally multi-disciplinary, performing different job tasks for 8 months across different sites in order to find out more about the company and how I fit into it. I first started in the Detroit metro area, where this Texas native experienced his first winter while working on defect reduction projects in a discrete manufacturing operation. I utilized a lot of statistical concepts in a Lean Six Sigma context, which was a useful perspective to gain. After that, I came back home to Houston where I did some market analyst work for BASF's plasticizers business. In that role, I started finding that data collection, storage, and delivery had a lot of applications, and I had my first experience provisioning my own SQL DB in MS Access. I was lucky to find BASF's internal data science group and convince them to take me in for my last assignment. To prepare, I had to give myself a crash course in R and machine learning through <a href="http://appliedpredictivemodeling.com/">Applied Predictive Modeling</a>. I found this role to be what I was looking for this whole time- finally combining the programming and mathematical aspects to chemical engineering. Honestly, if I had described what my dream job had been at the end of my undergraduate degree, it probably would look a lot like what I began doing in this assignment. </p> <br>
+        <p>Since then, I've been doing the more or less same things as that assignment in a lot of different organizational manifestations: bringing data science to manufacturing use cases. To broaden my skill set past my self-educated crash course, I began pursuing UC Berkeley's Master of Information and Data Science while still working full time, and I completed the degree in August 2020. All in the meantime, I've been able to develop several skillsets relevant to the data science space, like scoping problems, machine learning, experimentation, product development and deployment, containerization and orchestration, and a slew of others. I've also been lucky to be in positions to share these skills with others, both in the form of delivering trainings as well as mentoring and managing rotational program participants who are looking for experiences like the ones I've described.</p> <br>
+        <p>These days, I've been looking to further develop some technical skill sets around side projects that I will be posting in much greater detail with blog posts on this site. Some of these include:</p>
+        <ul>
+          <li>Developing this website and showing dynamic visualizations in frameworks like D3</li>
+          <li>Computer networking with a variety of projects involving raspberry pi's</li>
+          <li>ML on edge devices, with projects involving my NVIDIA Jetson</li>
+          <li>Time series applications</li>
+          <li>Product development, API development, and algorithm development</li>
+          <li>Reinforcement learning through making board game AIs</li>
+        </ul>
+        <br>
+        <p>I approach data science from a pragmatic perspective, always wanting to make sure that my projects are aimed at some real-life use case (even if whimsical). There's a lot of hype in the field currently, and I'm always interested in making sure that hype turns into something tangible and real. </p> <br>
+        <p>When I'm not coding or working on side projects, I can commonly be found spending time on other interests such as:</p>
+        <ul>
+          <li>Playing board games (I have over 30 games, it's a problem)</li>
+          <li>Cooking</li>
+          <li>Making cocktails, with a special interest in Tiki drinks</li>
+          <li>Looking after my plants</li>
+          <li>Reading fiction and nonfiction</li>
+          <li>PC Gaming (Age of Empires 2 + League of Legends mostly)</li>
+          <li>Making and drinking coffee</li>
+          <li>Watching live sports, with a focus on rugby + American football</li>
+          <li>Enjoying the outdoors on bike or on foot</li>
+        </ul>
+        <br>
+        <p>If you got this far, thanks for reading! Feel welcome to <a href="mailto:john.boudreaux.93@gmail.com">get in touch</a> if you'd like to discuss some of these topics further. </p>
+      </div>
+      <div class="column">
+        <p class="lead">In case you like graphics and lists...</p>
+        <br>
+        <p>In case you're just looking for a pdf resume, <a href="./BoudreauxJohnResume20200818.pdf">here it is</a>. Another way to get the bullet points would be to look at my <a href="https://www.linkedin.com/in/boudreauxjohn/">LinkedIn Page</a>. </p>
+        <h5>Work Experience (click for more details):</h5>
+        <button class="collapsible"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/BASF-Logo_bw.svg/1920px-BASF-Logo_bw.svg.png" width="100" height="30" alt="BASF">  Data Scientist (February 2017 - present)</button>
+        <div class="content">
+          <p>This began as a part of BASF's rotational new hire program, but turned into my full time role after 8 months. My role primarily is to identify and scope use cases to bring data science and analytics for manufacturing use cases, usually for process optimization. Deliverables can range from written reports, field experiments, self-suffiencent web applications, APIs around machine learning models, or anything else that the use case requires. A typical tech stack includes Python/R, Docker, Kubernetes, and MS Azure.
+          <br><Br> In addition to the more nitty gritty coding parts of the job, I give internal trainings around data science concepts for leadership level as well as hands-on courses for engineers. To further grow BASF's data science talent pool, I also manage and mentor data science and engineering graduates in BASF's rotational programs.
+        </p>
+        </div>
+        <button class="collapsible"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/BASF-Logo_bw.svg/1920px-BASF-Logo_bw.svg.png" width="100" height="30" alt="BASF">  Market Specialist (June 2016 - January 2017)</button>
+        <div class="content">
+          <p>This was an 8 month rotation as a part of BASF's new hire rotational program. In this role, I created a MS Access tool for salespeople to better store and manage data around customer expected purchasing volume. I also performed analysis and reported on various aspects of the industrial petrochemical market in North America. For many of these analyses, I was able to bring mathematical rigor into the role by using techniques like linear programming and hypothesis testing. Many of these analyses were automated using Excel Macros.</p>
+        </div>
+        <button class="collapsible"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/BASF-Logo_bw.svg/1920px-BASF-Logo_bw.svg.png" width="100" height="30" alt="BASF">  Quality Engineer (September 2015 - May 2016)</button>
+        <div class="content">
+          <p>This was an 8 month rotation as a part of BASF's new hire rotational program. I used Lean Six Sigma methodology to analyze root causes for manufacturing defects and inefficiencies. This applied to aspects of formulatioms, process cycle times, machine malfunctions, and many other parts of the process.</p>
+        </div>
+        <button class="collapsible"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/BASF-Logo_bw.svg/1920px-BASF-Logo_bw.svg.png" width="100" height="30" alt="BASF">  Production Engineer Intern (May 2014 - August 2014)</button>
+        <div class="content">
+          <p>In this 3 month internship, I assumed responsibility for the day-to-day operations of demineralized water, cogeneration, and steam operations for a multi-plant site. I analyzed data trends for events that could require escalation, and at times had to collect samples in order to recommend chemical additive adjustments. I also researched, ran financial scenarios, and delivered a written report for a new chemical process technology that was applicable to the process.</p>
+        </div>
+        <button class="collapsible"> <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/55/Solvay_S.A._logo.svg/1920px-Solvay_S.A._logo.svg.png" width="90" height="30" alt="Solvay">  Logistics Procurement Intern (May 2013 - August 2013)</button>
+        <div class="content">
+          <p>In this 3 month internship, I researched and reported various aspects of rail shipping to suggest new KPIs for the business to consider. Additionally, I trained myself on the new Chemlogix Sterling TMS software system and wrote an instruction manual for other users in the company. I also evaluated suppliers as a part of an RFI and bid process.</p>
+        </div>
+        <h4>Education:</h4>
+        <button class="collapsible"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Seal_of_University_of_California%2C_Berkeley.svg/150px-Seal_of_University_of_California%2C_Berkeley.svg.png" width="50" height="50" alt="UC Berkeley">  MIDS, University of California - Berkeley 2020</button>
+        <div class="content">
+          <p>I completed UC Berkeley's Master of Information and Data Science program from the School of Information in the summer of 2020. I completed all coursework and projects while working full time, which allowed for a great experience of learning concepts one day and using them in my job the next. My final capstone project revolved around image augmentation to lessen the effects of distribution gaps that exist in datasets, which can be seen in my projects.</p>
+        </div>
+        <button class="collapsible"> <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/University_of_Texas_at_Austin_seal.svg/800px-University_of_Texas_at_Austin_seal.svg.png" width="50" height="50" alt="UT Austin">  BS ChE, University of Texas - Austin 2015</button>
+        <div class="content">
+          <p>I graduated from UT Austin with a BS in Chemical engineering and also completed a Business Foundations Certificate, UT's version of a business minor. I was heavily involved with chemical engineering organizations like AIChE. My main organizational affiliation, however, was with UT's rugby team where I started all 4 years and held officer positions like president, vice president, and recruiting officer.</p>
+        </div>
+        <h4>Skills:</h4>
+        <button class="collapsible">A lot!</button>
+        <div class="content">
+          <p>Excuse the mess while this section is still being worked on, I have plans for a nice D3 visualization. In the meantime, I'm proficient in R and Python, and knowledgeable in SQL. I have experience with Spark, bash scripting, Docker, and Kubernetes. My main front end tools are R Shiny and Dash, although I am using this website to get more experience with HTML + Javascript and especially D3. I am knowledgeable about statistics and machine learning methods. For now, I'll leave the rest for the viz when it comes!</p>
+        </div>
+        <h4>Projects:</h4>
+        <button class="collapsible">Research Project: Targeting the Distribution Gap using Augmentation</button>
+        <div class="content">
+          <p>This project was done with the partnership of other UC Berkeley MIDS students as a part of the program capstone. We explored using different types of data augmentation to create different datasets in order to observe if they effectively changed models' performance across datasets. This work followed up on previous work coming out of UC Berkeley, which found the existence of a distribution gap across classifiers for CIFAR-10 and Imagenet (Recht et al, 2019). A full writeup can be seen <a href="http://people.ischool.berkeley.edu/~john.boudreaux/w210/Targeting_the_Distribution_Gap_using_Augmentation.pdf">here</a>, and the github repository is <a href="https://github.com/danzisar/w210-capstone">here</a>. </p>
+        </div>
+      </div>
+    </div>
 </main><!-- /.container -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+      <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.maxHeight){
+            content.style.maxHeight = null;
+          } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
+        });
+      }
+      </script>
 </html>
