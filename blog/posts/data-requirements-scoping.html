@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v4.1.1">
+    <title>Tinkering with data - Blog</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/starter-template/">
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+      div.parent {
+    	text-align: center;
+    	}
+    ul {
+    	display: inline-block;
+    	text-align: left;
+    	}
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="../../css/starter-template.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <a class="navbar-brand" href="#">John Boudreaux</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="../../index.html">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="../../about/index.html">About</a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="../index.html">Blog</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="./../../../portfolio/index.html">Portfolio</a>
+      </li>
+    </ul>
+    <!-- take out for now
+    <form class="form-inline my-2 my-lg-0">
+      <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+      <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+    </form>
+    -->
+  </div>
+</nav>
+
+<main role="main" class="container">
+
+  <div class="starter-template">
+    <h1>How to know you have the right data</h1><br>
+    <p class="lead">TLDR; Depending on what you are trying to do with a use case, the requirements of your data will change. The more fancy things you try to do, the more you're going to need to have the data to fuel them.</p>
+    <br>
+    <h3>Drilling for usefulness</h3>
+    <p>We frequently get bombarded with the feeling that we should be doing more with our data. Sayings like “data is the new oil” make us think that we are sitting idly on top of something immensely valuable. In many cases that can be true- but like oil, just because we can tap into it does not mean that we can use it for everything in our lives (and especially not without heavy processing). Just like we wouldn’t use crude oil drawn from the ground as a household cleaner, we shouldn’t expect data to work for anything we might imagine right from the get-go. You could end up unintentionally making a mess in the process.
+    </p>
+    <br>
+    <h3>What are we trying to improve, anyways?</h3>
+    <p>
+    Understanding the value of your data comes down to understanding it in the context of your business. Data allows us to improve organizations, operations, and lives by targeting a variety of KPIs, and those KPIs ought to be central to whatever we are trying to achieve. In a business setting, we might look to reduce cost or make new revenue streams. Whatever the objective is, we have to be clear on what we’re trying to achieve and how we’re going to measure it. Until you’re talking about what you want to try to do with your data, it’s impossible to say if your data is sufficient to do the thing. We should start by defining use cases.
+    </p>
+    <p>
+      Note that use case definitions can be incredibly specific or incredibly broad. Creating a platform that can run experiments across all facets of an online retail business to boost sales revenue is a large scope, but one that is definite. Likewise, counting the number of customers visiting a restaurant in a day to see if you should buy another table comes with different requirements. Use cases can be micro-scale or massive, but all should have some type of value to the organization.
+    </p>
+    <br>
+    <h3>
+      How to paint it out
+    </h3>
+    <p>
+      Whenever you identify a use case that would be impactful to your organization, it’s useful to think of your data existing on two axes: the confidence in your data, and the quantity of your data. Quantity of the data refers to the absolute amount of data you can control, gather, and use in a relevant time period for the use case. Confidence in the data refers to how much you can truly believe that each measurement is capturing the relevant phenomena precisely. If using multiple data sources for a use case, we are inherently limited by our worst actor in each dimension.
+    </p>
+    <p>Given these two dimensions, any use case has some type of threshold of confidence and quantity of data that are needed to make it feasible. Graphically speaking, use cases can be thought of like the below figure:</p>
+    <br>
+    <img src="./data-regions.JPG" alt="">
+    <br>
+    <br>
+    <br>
+    <p>Your individual use case might turn this line into some different type of curve or change the slope or area in each of the regions, but fundamentally there is always some tradeoff between confidence in your data and the overall quantity of data available that will make it feasible. Note that this graphic is asymptotic towards each axis; fundamentally there is no amount of data that will make up for zero confidence, and with no measurements this is a nonstarter. While this isn’t necessarily the strictest mathematical representation, it’s nifty in gauging where you are before starting a use case.
+    </p>
+    <p>Additional utility of performing this type of graphical analysis for a use case comes when we can judge our data relevant to multiple use cases simultaneously. Perhaps we’re looking at three use cases, all aimed at increasing sales. Our options might be:</p>
+    <div class="parent">
+      <ul>
+        <li>A simple statistical analysis, written in a report (least requirements) </li>
+        <li>A live dashboard reporting the same basic analysis with drill-down (intermediate requirements)</li>
+        <li>A full-scale AI system performing segmentation and recommending salesperson intervention by customer (most requirements)</li>
+      </ul>
+    </div>
+    <br>
+    <img src="./multi-projects.JPG" alt="">
+    <br>
+    <br>
+    <br>
+    <p>By plotting these out graphically, we can get a feel for if waiting a few months for more data is what separates us from the most valuable use case or if more systematic change is needed.</p>
+    <p>In the end, data is only valuable if we use it. By focusing on where and how we might use the data first, we can get a better understanding of how valuable this data really is. When you start with the finished product in mind, the value of that oil you’re drilling into can look a lot different.</p>
+  </div>
+
+</main><!-- /.container -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+      <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+</html>
